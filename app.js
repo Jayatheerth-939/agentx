@@ -1,5 +1,5 @@
-/* ==========================================================================
-   AgentX Swarm — Frontend Controller & Autonomous Git Pipeline Engine
+﻿/* ==========================================================================
+   PhantomPatch â€” Frontend Controller & Autonomous Git Pipeline Engine
    ========================================================================== */
 
 // --------------------------------------------------------------------------
@@ -10,7 +10,7 @@ const AppState = {
   stagedFiles: [],        // Array of { name, path, content, size, type }
   activeFileIndex: -1,
   editorCode: '',
-  githubUrl: 'https://github.com/deepmind-agent/swarm-core',
+  githubUrl: 'https://github.com/deepmind-agent/phantompatch-core',
   isGitValid: true,
   lastAnalysis: null,
   checkpoints: []
@@ -241,7 +241,7 @@ function updateEditorMetrics() {
   const text = DOM.snippetInput.value;
   const lines = text.split('\n').length;
   DOM.lineNumbers.innerHTML = Array.from({ length: lines }, (_, i) => i + 1).join('<br>');
-  DOM.editorCharCount.textContent = `${text.length} chars • ${lines} lines`;
+  DOM.editorCharCount.textContent = `${text.length} chars â€¢ ${lines} lines`;
   AppState.editorCode = text;
 }
 
@@ -558,7 +558,7 @@ async function runValidateCode() {
         healthScore: data.health_score || 95,
         commitHash: data.commit_hash || ('sha-' + Math.random().toString(16).substring(2, 9))
       };
-      logTerminal(`[BACKEND 200 OK] Analysis completed by AgentX Server AST Engine.`, 'fix');
+      logTerminal(`[BACKEND 200 OK] Analysis completed by PhantomPatch Server AST Engine.`, 'fix');
     } else {
       throw new Error(`Server returned status ${res.status}`);
     }
@@ -587,7 +587,7 @@ async function runValidateCode() {
     analysis.errors.forEach(err => logTerminal(`Line ${err.line}: ${err.message || err.msg}`, 'warn'));
     logTerminal(`AI Auto-Healer generated ${analysis.fixes.length} patch(es).`, 'fix');
   } else {
-    logTerminal('✅ Code AST is clean. All static type checks passed!', 'fix');
+    logTerminal('âœ… Code AST is clean. All static type checks passed!', 'fix');
   }
 
   // Show review stage drawer
@@ -619,7 +619,7 @@ async function runPushToGitHub() {
     showToast('Rule Violation: GitHub Push requires a File or Folder! (Converting snippet...)', 'warn', 'fa-shield-halved');
     
     // Auto-convert snippet to a staged file to be helpful & compliant!
-    const convertedFileName = 'swarm_auto_export.py';
+    const convertedFileName = 'phantompatch_auto_export.py';
     AppState.stagedFiles.push({
       name: convertedFileName,
       path: convertedFileName,
@@ -694,7 +694,7 @@ async function runPushToGitHub() {
     DOM.trackerInput.classList.add('completed');
 
     playSound('success');
-    showToast(`🚀 Successfully Auto-Healed & Pushed [${result.commitHash}] to GitHub!`, 'success', 'fa-rocket');
+    showToast(`ðŸš€ Successfully Auto-Healed & Pushed [${result.commitHash}] to GitHub!`, 'success', 'fa-rocket');
   }, 600);
 }
 
@@ -790,7 +790,7 @@ function saveSnapshot() {
 
   AppState.checkpoints.unshift(snap);
   try {
-    localStorage.setItem('agentx_snapshots', JSON.stringify(AppState.checkpoints));
+    localStorage.setItem('PhantomPatch_snapshots', JSON.stringify(AppState.checkpoints));
   } catch (e) {}
 
   DOM.chkCount.textContent = AppState.checkpoints.length;
@@ -840,7 +840,7 @@ function renderCheckpoints() {
 
 function loadSavedCheckpointsFromStorage() {
   try {
-    const raw = localStorage.getItem('agentx_snapshots');
+    const raw = localStorage.getItem('PhantomPatch_snapshots');
     if (raw) {
       AppState.checkpoints = JSON.parse(raw);
       DOM.chkCount.textContent = AppState.checkpoints.length;
@@ -850,7 +850,7 @@ function loadSavedCheckpointsFromStorage() {
 
 DOM.clearAllCheckpointsBtn.addEventListener('click', () => {
   AppState.checkpoints = [];
-  try { localStorage.removeItem('agentx_snapshots'); } catch(e){}
+  try { localStorage.removeItem('PhantomPatch_snapshots'); } catch(e){}
   DOM.chkCount.textContent = '0';
   renderCheckpoints();
   logTerminal('All snapshots cleared.', 'sys');
@@ -969,3 +969,4 @@ function init() {
 }
 
 window.addEventListener('DOMContentLoaded', init);
+

@@ -1,9 +1,9 @@
-"""
-AgentX Swarm — Unified Full-Stack Server
+﻿"""
+PhantomPatch â€” Unified Full-Stack Server
 Serves front-end assets (HTML, CSS, JS) and handles backend API endpoints:
 - POST /api/validate: Code AST & Security Vulnerability Engine
 - POST /api/push: Automated Code Auto-Heal & GitHub Deployment
-- POST /api/swarm-analyze: Multi-Agent Consensus Analysis
+- POST /api/phantompatch-analyze: Multi-Agent Consensus Analysis
 """
 
 import http.server
@@ -19,7 +19,7 @@ import time
 PORT = 8000
 WORKSPACE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-class AgentXServerHandler(http.server.SimpleHTTPRequestHandler):
+class PhantomPatchServerHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=WORKSPACE_DIR, **kwargs)
 
@@ -43,8 +43,8 @@ class AgentXServerHandler(http.server.SimpleHTTPRequestHandler):
             self.handle_validate()
         elif path == '/api/push':
             self.handle_push()
-        elif path in ('/api/swarm-analyze', '/vscode-analyze'):
-            self.handle_swarm_analyze()
+        elif path in ('/api/phantompatch-analyze', '/vscode-analyze'):
+            self.handle_phantompatch_analyze()
         else:
             self._set_headers(404)
             self.wfile.write(json.dumps({"error": "Endpoint not found"}).encode('utf-8'))
@@ -179,7 +179,7 @@ class AgentXServerHandler(http.server.SimpleHTTPRequestHandler):
     def handle_validate(self):
         data = self._read_json_body()
         code = data.get("code", "")
-        print(f"📥 [Backend] Validating {len(code.splitlines())} lines of code...")
+        print(f"ðŸ“¥ [Backend] Validating {len(code.splitlines())} lines of code...")
         
         result = self.analyze_and_fix_code(code)
         self._set_headers(200)
@@ -202,7 +202,7 @@ class AgentXServerHandler(http.server.SimpleHTTPRequestHandler):
         mode = data.get("mode", "snippet")
         files = data.get("files", [])
 
-        print(f"🚀 [Backend] Initiating Auto-Heal & Push to: {github_url} (Mode: {mode})")
+        print(f"ðŸš€ [Backend] Initiating Auto-Heal & Push to: {github_url} (Mode: {mode})")
         
         # Analyze & Auto-fix code
         result = self.analyze_and_fix_code(code)
@@ -228,7 +228,7 @@ class AgentXServerHandler(http.server.SimpleHTTPRequestHandler):
         self._set_headers(200)
         self.wfile.write(json.dumps(response_payload).encode('utf-8'))
 
-    def handle_swarm_analyze(self):
+    def handle_phantompatch_analyze(self):
         data = self._read_json_body()
         code = data.get("code", "")
         result = self.analyze_and_fix_code(code)
@@ -255,10 +255,10 @@ def run_server():
         except Exception:
             pass
     socketserver.TCPServer.allow_reuse_address = True
-    with socketserver.TCPServer(("", PORT), AgentXServerHandler) as httpd:
-        print(f"[SERVER] AgentX Unified Full-Stack Server listening on http://localhost:{PORT}")
+    with socketserver.TCPServer(("", PORT), PhantomPatchServerHandler) as httpd:
+        print(f"[SERVER] PhantomPatch Unified Full-Stack Server listening on http://localhost:{PORT}")
         print(f"[WORKSPACE] Serving Frontend from: {WORKSPACE_DIR}")
-        print(f"[API] Backend Endpoints: /api/validate | /api/push | /api/swarm-analyze")
+        print(f"[API] Backend Endpoints: /api/validate | /api/push | /api/phantompatch-analyze")
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:
@@ -266,3 +266,4 @@ def run_server():
 
 if __name__ == '__main__':
     run_server()
+
