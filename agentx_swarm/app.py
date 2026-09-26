@@ -7,7 +7,7 @@ import json
 import sys
 
 st.set_page_config(
-    page_title="AgentX Security Swarm",
+    page_title="PhantomPatch Security Swarm",
     page_icon="⚡",
     layout="wide",
 )
@@ -21,13 +21,13 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title(" AgentX Local Security Swarm")
+st.title(" PhantomPatch Local Security Swarm")
 st.caption("Autonomous Multi-Agent System powered by your fine-tuned CrossVul LoRA adapter")
 
 @st.cache_resource
-def load_agentx_engine():
+def load_PhantomPatch_engine():
     BASE_MODEL = "Qwen/Qwen2.5-Coder-1.5B-Instruct"
-    ADAPTER_PATH = "./agentx_crossvul_adapter" 
+    ADAPTER_PATH = "./PhantomPatch_crossvul_adapter" 
     
     print("⏳ [Terminal Log] Loading tokenizer...", flush=True)
     tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL)
@@ -45,8 +45,8 @@ def load_agentx_engine():
     return tokenizer, model
 
 with st.spinner(" Loading base model & custom security weights into VRAM (Check terminal for live progress)..."):
-    tokenizer, model = load_agentx_engine()
-st.success(" AgentX Custom Security Engine Ready!")
+    tokenizer, model = load_PhantomPatch_engine()
+st.success(" PhantomPatch Custom Security Engine Ready!")
 
 def local_model_generate(prompt):
     inputs = tokenizer(prompt, return_tensors="pt").to("cuda" if torch.cuda.is_available() else "cpu")
@@ -85,8 +85,8 @@ def formatter_agent(consensus_data):
     prompt = f"Format this decision into a clean Markdown developer report card:\n{consensus_data}"
     return local_model_generate(prompt)
 
-def run_agentx_swarm(vulnerable_code):
-    with st.status(" Running AgentX Swarm Pipeline...", expanded=True) as status:
+def run_PhantomPatch_swarm(vulnerable_code):
+    with st.status(" Running PhantomPatch Swarm Pipeline...", expanded=True) as status:
         st.write(" Agents 1-4: Running parallel expert fixer personas...")
         with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
             futures = [
@@ -111,11 +111,11 @@ def run_agentx_swarm(vulnerable_code):
 default_snippet = 'cursor.execute(f"SELECT * FROM users WHERE name = {user_input}")'
 code_input = st.text_area("Vulnerable Code Snippet", value=default_snippet, height=120)
 
-if st.button(" Run AgentX Swarm Analysis"):
+if st.button(" Run PhantomPatch Swarm Analysis"):
     if not code_input.strip():
         st.warning(" Please provide a valid code snippet.")
     else:
-        raw_results, report = run_agentx_swarm(code_input)
+        raw_results, report = run_PhantomPatch_swarm(code_input)
         
         st.markdown("###  Individual Expert Fixer Proposals")
         tabs = st.tabs(["Defensive Architect", "Performance Coder", "Minimalist Specialist", "Compliance Expert"])

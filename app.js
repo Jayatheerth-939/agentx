@@ -1,5 +1,5 @@
 /* ==========================================================================
-   AgentX Swarm — Frontend Controller & Autonomous Git Pipeline Engine
+   PhantomPatch Swarm — Frontend Controller & Autonomous Git Pipeline Engine
    ========================================================================== */
 
 // --------------------------------------------------------------------------
@@ -558,7 +558,7 @@ async function runValidateCode() {
         healthScore: data.health_score || 95,
         commitHash: data.commit_hash || ('sha-' + Math.random().toString(16).substring(2, 9))
       };
-      logTerminal(`[BACKEND 200 OK] Analysis completed by AgentX Server AST Engine.`, 'fix');
+      logTerminal(`[BACKEND 200 OK] Analysis completed by PhantomPatch Server AST Engine.`, 'fix');
     } else {
       throw new Error(`Server returned status ${res.status}`);
     }
@@ -790,7 +790,7 @@ function saveSnapshot() {
 
   AppState.checkpoints.unshift(snap);
   try {
-    localStorage.setItem('agentx_snapshots', JSON.stringify(AppState.checkpoints));
+    localStorage.setItem('PhantomPatch_snapshots', JSON.stringify(AppState.checkpoints));
   } catch (e) {}
 
   DOM.chkCount.textContent = AppState.checkpoints.length;
@@ -840,7 +840,7 @@ function renderCheckpoints() {
 
 function loadSavedCheckpointsFromStorage() {
   try {
-    const raw = localStorage.getItem('agentx_snapshots');
+    const raw = localStorage.getItem('PhantomPatch_snapshots');
     if (raw) {
       AppState.checkpoints = JSON.parse(raw);
       DOM.chkCount.textContent = AppState.checkpoints.length;
@@ -850,7 +850,7 @@ function loadSavedCheckpointsFromStorage() {
 
 DOM.clearAllCheckpointsBtn.addEventListener('click', () => {
   AppState.checkpoints = [];
-  try { localStorage.removeItem('agentx_snapshots'); } catch(e){}
+  try { localStorage.removeItem('PhantomPatch_snapshots'); } catch(e){}
   DOM.chkCount.textContent = '0';
   renderCheckpoints();
   logTerminal('All snapshots cleared.', 'sys');

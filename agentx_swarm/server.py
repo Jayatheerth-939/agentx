@@ -48,5 +48,5 @@ def vscode_analyze():
     })
 
 if __name__ == '__main__':
-    print("🚀 AgentX Background Linter Server running on http://127.0.0.1:8000 ...")
+    print("🚀 PhantomPatch Background Linter Server running on http://127.0.0.1:8000 ...")
     app.run(host='127.0.0.1', port=8000)

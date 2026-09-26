@@ -1,6 +1,6 @@
 {
-  "name": "agentx-vscode",
-  "displayName": "AgentX Background Security Linter",
+  "name": "PhantomPatch-vscode",
+  "displayName": "PhantomPatch Background Security Linter",
   "version": "1.0.0",
   "engines": {
     "vscode": "^1.80.0"
@@ -12,8 +12,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "agentx.manualAudit",
-        "title": "AgentX: Force Re-Scan File"
+        "command": "PhantomPatch.manualAudit",
+        "title": "PhantomPatch: Force Re-Scan File"
       }
     ]
   }

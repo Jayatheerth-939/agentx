@@ -1,5 +1,5 @@
 """
-AgentX Swarm — Unified Full-Stack Server
+PhantomPatch Swarm — Unified Full-Stack Server
 Serves front-end assets (HTML, CSS, JS) and handles backend API endpoints:
 - POST /api/validate: Code AST & Security Vulnerability Engine
 - POST /api/push: Automated Code Auto-Heal & GitHub Deployment
@@ -19,7 +19,7 @@ import time
 PORT = 8000
 WORKSPACE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-class AgentXServerHandler(http.server.SimpleHTTPRequestHandler):
+class PhantomPatchServerHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=WORKSPACE_DIR, **kwargs)
 
@@ -255,8 +255,8 @@ def run_server():
         except Exception:
             pass
     socketserver.TCPServer.allow_reuse_address = True
-    with socketserver.TCPServer(("", PORT), AgentXServerHandler) as httpd:
-        print(f"[SERVER] AgentX Unified Full-Stack Server listening on http://localhost:{PORT}")
+    with socketserver.TCPServer(("", PORT), PhantomPatchServerHandler) as httpd:
+        print(f"[SERVER] PhantomPatch Unified Full-Stack Server listening on http://localhost:{PORT}")
         print(f"[WORKSPACE] Serving Frontend from: {WORKSPACE_DIR}")
         print(f"[API] Backend Endpoints: /api/validate | /api/push | /api/swarm-analyze")
         try:

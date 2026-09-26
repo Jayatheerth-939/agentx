@@ -5,9 +5,9 @@ let diagnosticCollection;
 let debounceTimer = null;
 
 function activate(context) {
-    console.log('🚀 AgentX Background Linter is active and running!');
+    console.log('🚀 PhantomPatch Background Linter is active and running!');
 
-    diagnosticCollection = vscode.languages.createDiagnosticCollection('agentx-security');
+    diagnosticCollection = vscode.languages.createDiagnosticCollection('PhantomPatch-security');
     context.subscriptions.push(diagnosticCollection);
 
     // Trigger on active editor change immediately
@@ -66,16 +66,16 @@ function sendCodeToBackend(document, codeText) {
         res.on('end', () => {
             try {
                 const jsonRes = JSON.parse(responseBody);
-                console.log("AgentX Server Response Received:", jsonRes);
+                console.log("PhantomPatch Server Response Received:", jsonRes);
                 updateEditorDiagnostics(document, jsonRes.vulnerabilities || []);
             } catch (e) {
-                console.error("AgentX Parse Error:", e);
+                console.error("PhantomPatch Parse Error:", e);
             }
         });
     });
 
     req.on('error', (error) => {
-        console.log("❌ AgentX Connection Error to Flask:", error.message);
+        console.log("❌ PhantomPatch Connection Error to Flask:", error.message);
     });
 
     req.write(data);
@@ -97,10 +97,10 @@ function updateEditorDiagnostics(document, vulnerabilities) {
 
         const diagnostic = new vscode.Diagnostic(
             range,
-            `🛡️ AgentX Security: ${vuln.message}`,
+            `🛡️ PhantomPatch Security: ${vuln.message}`,
             vscode.DiagnosticSeverity.Error
         );
-        diagnostic.source = 'AgentX Swarm';
+        diagnostic.source = 'PhantomPatch Swarm';
         diagnostics.push(diagnostic);
     });
 
