@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AgentX Swarm — Autonomous Code Validator & GitHub Pipeline</title>
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Ambient background glow elements -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+  <div class="ambient-glow glow-3"></div>
+  <div class="grid-overlay"></div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Navigation Bar -->
+  <header class="navbar glass-card">
+    <div class="nav-brand">
+      <div class="brand-logo">
+        <i class="fa-solid fa-bolt-lightning pulse-icon"></i>
+      </div>
+      <div>
+        <h1 class="brand-title">AgentX <span>Swarm</span></h1>
+        <p class="brand-badge">AI Code Engine v2.4 • Active</p>
+      </div>
+    </div>
+
+    <!-- Central Workflow Breadcrumb -->
+    <div class="nav-pipeline-tracker">
+      <div class="pipeline-step active" id="tracker-input">
+        <span class="step-num">1</span>
+        <span class="step-label">Source Input</span>
+      </div>
+      <div class="pipeline-line" id="line-1"></div>
+      <div class="pipeline-step" id="tracker-validate">
+        <span class="step-num">2</span>
+        <span class="step-label">Auto-Fix & Lint</span>
+      </div>
+      <div class="pipeline-line" id="line-2"></div>
+      <div class="pipeline-step" id="tracker-push">
+        <span class="step-num">3</span>
+        <span class="step-label">Auto-Repair & Report</span>
+      </div>
+    </div>
+
+    <!-- Quick Stats & Actions -->
+    <div class="nav-actions">
+      <button class="nav-btn" id="navSaveCheckpoint" title="Quick Checkpoint">
+        <i class="fa-solid fa-floppy-disk"></i>
+        <span>Snapshot</span>
+      </button>
+      <div class="system-status-chip">
+        <span class="status-dot online"></span>
+        <span>Ready</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Grid App Layout -->
+  <div class="app-layout">
+    
+    <!-- LEFT SIDEBAR: File/Folder Explorer & Checkpoint History -->
+    <aside class="sidebar glass-card">
+      <div class="sidebar-header">
+        <div class="sidebar-tabs">
+          <button class="side-tab active" id="tabExplorerBtn" data-target="explorerPanel">
+            <i class="fa-solid fa-folder-tree"></i> Explorer
+          </button>
+          <button class="side-tab" id="tabHistoryBtn" data-target="historyPanel">
+            <i class="fa-solid fa-clock-rotate-left"></i> Snapshots <span class="badge-count" id="chkCount">0</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Explorer Panel -->
+      <div class="sidebar-content" id="explorerPanel">
+        <div class="explorer-upload-zone" id="dropZoneSide">
+          <i class="fa-solid fa-cloud-arrow-up drop-icon"></i>
+          <p>Drop file/folder here</p>
+          <span class="subtext">or browse system</span>
+          <div class="browse-buttons-row">
+            <label for="fileInput" class="mini-btn"><i class="fa-solid fa-file-code"></i> File</label>
+            <label for="folderInput" class="mini-btn"><i class="fa-solid fa-folder"></i> Folder</label>
+          </div>
+          <input type="file" id="fileInput" class="hidden-input" multiple />
+          <input type="file" id="folderInput" class="hidden-input" webkitdirectory directory multiple />
+        </div>
+
+        <div class="explorer-file-tree">
+          <div class="tree-header">
+            <span>STAGED FILES</span>
+            <button id="clearFilesBtn" class="text-btn" title="Clear all staged files"><i class="fa-solid fa-trash-can"></i></button>
+          </div>
+          <ul id="stagedFileList" class="tree-list">
+            <li class="empty-state-item">
+              <i class="fa-regular fa-folder-open"></i>
+              <span>No files staged. Using Code Snippet mode.</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- History Panel -->
+      <div class="sidebar-content hidden" id="historyPanel">
+        <div class="tree-header">
+          <span>SAVED CHECKPOINTS</span>
+          <button id="clearAllCheckpointsBtn" class="text-btn" title="Clear All"><i class="fa-solid fa-eraser"></i></button>
+        </div>
+        <ul id="checkpointList" class="checkpoint-card-list">
+          <li class="empty-state-item">
+            <i class="fa-solid fa-box-archive"></i>
+            <span>No snapshots saved yet.</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Live Engine Telemetry Widget -->
+      <div class="telemetry-box">
+        <div class="telemetry-header">
+          <span><i class="fa-solid fa-microchip"></i> ENGINE METRICS</span>
+          <span class="live-pill">LIVE</span>
+        </div>
+        <div class="metric-row">
+          <span>Syntax Guard</span>
+          <span class="metric-val text-cyan">AST v4.2 Enabled</span>
+        </div>
+        <div class="metric-row">
+          <span>Auto-Heal AI</span>
+          <span class="metric-val text-emerald">Active • Level 9</span>
+        </div>
+        <div class="metric-row">
+          <span>Validation Shield</span>
+          <span class="metric-val text-emerald" id="telemetryGitStatus">Active & Ready</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CENTER WORKSPACE: Editor & Configuration & Interactive Diff -->
+    <main class="main-workspace">
+      
+      <!-- Top Context Banner / Mode Selector -->
+      <div class="workspace-header glass-card">
+        <div class="source-mode-selector">
+          <button class="mode-pill active" data-mode="snippet" id="modeSnippetBtn">
+            <i class="fa-solid fa-code"></i> Code Snippet
+          </button>
+          <button class="mode-pill" data-mode="file" id="modeFileBtn">
+            <i class="fa-solid fa-file-lines"></i> Uploaded File
+          </button>
+          <button class="mode-pill" data-mode="folder" id="modeFolderBtn">
+            <i class="fa-solid fa-folder-open"></i> Folder Project
+          </button>
+        </div>
+
+        <div class="quick-presets">
+          <span class="preset-label"><i class="fa-solid fa-wand-magic-sparkles"></i> Test Presets:</span>
+          <button class="preset-btn" id="loadBuggyPyBtn">Buggy Python</button>
+          <button class="preset-btn" id="loadDirtyJsBtn">Async JS Glitch</button>
+          <button class="preset-btn" id="loadSqlInjBtn">Leaky SQL/API</button>
+        </div>
+      </div>
+
+      <!-- MAIN INPUT SECTION (Code & GitHub Link) -->
+      <div class="editor-container glass-card">
+        <div class="editor-header">
+          <div class="editor-meta">
+            <span class="mac-dot red"></span>
+            <span class="mac-dot yellow"></span>
+            <span class="mac-dot green"></span>
+            <span class="file-name-badge" id="activeEditorTitle"><i class="fa-brands fa-python"></i> main_script.py</span>
+            <span class="char-counter" id="editorCharCount">0 chars</span>
+          </div>
+
+          <div class="editor-controls">
+            <button class="icon-tool-btn" id="formatSnippetBtn" title="Beautify / Format"><i class="fa-solid fa-align-left"></i> Format</button>
+            <button class="icon-tool-btn" id="copySnippetBtn" title="Copy to Clipboard"><i class="fa-solid fa-copy"></i> Copy</button>
+            <button class="icon-tool-btn" id="downloadEditorBtn" title="Download Code File"><i class="fa-solid fa-file-arrow-down"></i> Download</button>
+            <button class="icon-tool-btn" id="clearEditorBtn" title="Clear Editor"><i class="fa-solid fa-rotate-left"></i> Reset</button>
+          </div>
+        </div>
+
+        <div class="code-editor-wrapper">
+          <div class="line-numbers" id="lineNumbers">1</div>
+          <textarea id="snippetInput" class="code-editor-textarea" spellcheck="false" placeholder="// Write, paste or load code snippet here...
+// The engine will validate, auto-correct bugs, and prepare git-ready patches.
+def calculate_metrics(data_points):
+    total = 0
+    for val in data_points
+        total += val
+    return {'total': total, 'average': total / len(data_points)}"></textarea>
+        </div>
+      </div>
+
+      <!-- GITHUB TARGET PIPELINE CONFIGURATION CARD -->
+      <div class="github-hub glass-card">
+        <div class="github-hub-header">
+          <div class="hub-title">
+            <i class="fa-brands fa-github text-cyan"></i>
+            <div>
+              <h3>GitHub Deployment Hub & Pipeline Target</h3>
+              <p>Specify target GitHub repository for automated validation, auto-repair patches, and CI/CD pipelines.</p>
+            </div>
+          </div>
+          <div class="repo-badge valid" id="repoStatusBadge">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>deepmind-agent/swarm-core</span>
+          </div>
+        </div>
+
+        <div class="github-input-group">
+          <div class="url-input-wrap">
+            <i class="fa-solid fa-code-branch input-icon"></i>
+            <input type="url" id="githubUrl" value="https://github.com/deepmind-agent/swarm-core" placeholder="https://github.com/owner/repository" />
+            <button class="verify-url-btn" id="verifyGitBtn"><i class="fa-solid fa-link"></i> Verify Link</button>
+          </div>
+
+          <div class="git-target-preview">
+            <span class="target-chip"><strong>Target Branch:</strong> main</span>
+            <span class="target-chip"><strong>Auto-Heal Engine:</strong> Enabled (Level 9)</span>
+            <span class="target-chip target-rule-chip" id="pushRuleBadge"><i class="fa-solid fa-shield-halved"></i> File/Folder Push Ready</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- MASTER ACTION BUTTONS BAR -->
+      <div class="action-dock glass-card">
+        <div class="dock-row">
+          
+          <!-- BUTTON 1: Validate Code -->
+          <button class="action-btn btn-validate" id="validateBtn">
+            <div class="btn-glow"></div>
+            <div class="btn-content">
+              <i class="fa-solid fa-microscope btn-icon"></i>
+              <div class="btn-text">
+                <span class="primary-text">Validate Code</span>
+                <span class="secondary-text">Deep AST scan & vulnerability detection</span>
+              </div>
+            </div>
+          </button>
+
+          <!-- BUTTON 2: Auto-Repair & Push to GitHub -->
+          <button class="action-btn btn-push" id="pushBtn">
+            <div class="btn-glow"></div>
+            <div class="btn-content">
+              <i class="fa-brands fa-github btn-icon"></i>
+              <div class="btn-text">
+                <span class="primary-text">Auto-Repair & Push to GitHub</span>
+                <span class="secondary-text">Fix syntax & deploy patch directly to main</span>
+              </div>
+            </div>
+          </button>
+
+          <!-- BUTTON 3: Validate & Review Patch -->
+          <button class="action-btn btn-show-push" id="validateShowPushBtn">
+            <div class="btn-glow"></div>
+            <div class="btn-content">
+              <i class="fa-solid fa-wand-magic-sparkles btn-icon"></i>
+              <div class="btn-text">
+                <span class="primary-text">Validate & Patch Review</span>
+                <span class="secondary-text">Interactive Diff Gate & Auto-Fix</span>
+              </div>
+            </div>
+          </button>
+
+        </div>
+      </div>
+
+      <!-- INTERACTIVE REVIEW / DIFF & VALIDATION STAGE (DYNAMIC DRAWER) -->
+      <div class="stage-container glass-card hidden" id="reviewStage">
+        <div class="stage-header">
+          <div class="stage-title">
+            <i class="fa-solid fa-wand-magic-sparkles text-cyan"></i>
+            <div>
+              <h3 id="stageHeading">AI Code Diagnostic & Auto-Repair Report</h3>
+              <p id="stageSubheading">Review detected syntax violations, automated patches, and deployment readiness.</p>
+            </div>
+          </div>
+          <div class="stage-actions">
+            <span class="score-pill" id="healthScoreBadge">Health: 98%</span>
+            <button class="close-stage-btn" id="closeStageBtn"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+        </div>
+
+        <!-- Diagnostic Summary Cards -->
+        <div class="diagnostic-grid">
+          <div class="diag-card card-errors">
+            <div class="diag-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <div class="diag-info">
+              <span class="diag-val" id="diagErrorCount">0</span>
+              <span class="diag-label">Errors Detected</span>
+            </div>
+          </div>
+          <div class="diag-card card-fixes">
+            <div class="diag-icon"><i class="fa-solid fa-wrench"></i></div>
+            <div class="diag-info">
+              <span class="diag-val" id="diagFixCount">0</span>
+              <span class="diag-label">Auto-Healed Fixes</span>
+            </div>
+          </div>
+          <div class="diag-card card-security">
+            <div class="diag-icon"><i class="fa-solid fa-shield-check"></i></div>
+            <div class="diag-info">
+              <span class="diag-val" id="diagSecurityStatus">Clean</span>
+              <span class="diag-label">Security Vulnerabilities</span>
+            </div>
+          </div>
+          <div class="diag-card card-git">
+            <div class="diag-icon"><i class="fa-solid fa-code-commit"></i></div>
+            <div class="diag-info">
+              <span class="diag-val" id="diagCommitHash">Pending</span>
+              <span class="diag-label">Report Patch Hash</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Side-By-Side Interactive Diff Viewer -->
+        <div class="diff-viewer-section">
+          <div class="diff-header">
+            <div class="diff-title"><i class="fa-solid fa-code-compare"></i> Auto-Repair Code Diff (Original vs Auto-Fixed)</div>
+            <div class="diff-tags">
+              <span class="diff-tag tag-removed">- Original (Buggy)</span>
+              <span class="diff-tag tag-added">+ AI Repaired Patch</span>
+            </div>
+          </div>
+          <div class="diff-grid">
+            <div class="diff-pane diff-pane-orig">
+              <div class="pane-header"><i class="fa-solid fa-file-code"></i> Original Source</div>
+              <pre id="diffOriginalCode" class="diff-code"><code>// Original code will render here...</code></pre>
+            </div>
+            <div class="diff-pane diff-pane-fixed">
+              <div class="pane-header"><i class="fa-solid fa-wand-magic"></i> Corrected Output Code</div>
+              <pre id="diffFixedCode" class="diff-code"><code>// Corrected code will render here...</code></pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stage Action Confirm Button -->
+        <div class="stage-footer" id="stageConfirmFooter">
+          <button class="download-patch-btn" id="downloadStagePatchBtn">
+            <i class="fa-solid fa-file-arrow-down"></i> Download Repaired File
+          </button>
+          <button class="confirm-push-btn" id="confirmStagePushBtn">
+            <i class="fa-solid fa-circle-check"></i> Apply Repaired Patch to Editor
+          </button>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- RIGHT CONSOLE: Live Terminal & Pipeline Activity -->
+    <aside class="console-drawer glass-card">
+      <div class="console-header">
+        <div class="console-title">
+          <i class="fa-solid fa-terminal text-cyan"></i>
+          <span>Execution Stream</span>
+        </div>
+        <div class="console-actions">
+          <button class="terminal-btn" id="clearConsoleBtn" title="Clear Console"><i class="fa-solid fa-ban"></i></button>
+          <span class="live-blink"></span>
+        </div>
+      </div>
+
+      <div class="terminal-body" id="terminalOutput">
+        <div class="term-line term-sys">[SYSTEM] AgentX Swarm initialized and listening on port 8000.</div>
+        <div class="term-line term-info">[INFO] Engine ready. Select input or click a preset to begin.</div>
+      </div>
+
+      <div class="console-footer">
+        <div class="git-status-summary">
+          <i class="fa-solid fa-circle-nodes text-emerald"></i>
+          <span id="consoleFooterStatus">Worker Pool: 4 Threads Idle</span>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+  <!-- Footer Info Bar -->
+  <footer class="app-footer">
+    <div class="footer-content">
+      <span>⚙️ <strong>AgentX Swarm Engine</strong> — Autonomous Code Fixer & Git Synchronizer</span>
+      <span>Status: <strong class="text-emerald">All Systems Operational</strong></span>
+    </div>
+  </footer>
+
+  <!-- App Script -->
+  <script src="app.js"></script>
+</body>
+</html>
